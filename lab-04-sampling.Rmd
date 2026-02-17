@@ -58,7 +58,7 @@ By the end of this lab, you should be able to:
 
 ## Load and inspect
 
-```{r load_data, echo=TRUE, eval=FALSE}
+```{r load_data, echo=TRUE, eval=TRUE}
 df <- read_csv("data/us-ams-simple.csv") %>%
   clean_names() %>% filter(year_local == 2023)
 
@@ -73,15 +73,15 @@ glimpse(df)
 
 This dataset uses **Year + Day-of-Year (DOY)**. Month must be derived from a calendar date.
 
-```{r derive_time, echo=TRUE, eval=FALSE}
+```{r derive_time, echo=TRUE, eval=TRUE}
 df <- df %>%
   mutate(
     # TODO: create a Date column from year_local and doy
     # HINT: Jan 1 is DOY = 1, so use (doy - 1) with origin = "YYYY-01-01"
-    date = as.Date(___ - 1, origin = paste0(___, "-01-01")),
+    date = as.Date(doy - 1, origin = paste0(year_local, "-01-01")),
 
     # TODO: create a month column (numeric 1–12 or labeled months)
-    month = month(___, label = TRUE, abbr = TRUE),
+    month = month(date, label = TRUE, abbr = TRUE),
 
     # TODO: make a day/night label using daytime (0/1)
     day_night = if_else(daytime == 1, "Day", "Night")
@@ -102,22 +102,22 @@ Examples you can choose from (depending on what you see in the dataset):
 - Energy: `le`
 - Meteorology: `ta`, `ts`, `swc`
 
-```{r choose_response, echo=TRUE, eval=FALSE}
+```{r choose_response, echo=TRUE, eval=TRUE}
 # TODO: choose ONE response variable (a column name as a string)
 response_var <- "gpp"   # replace "gpp" with your choice, e.g. "fc" or "le" or "ta"
 
 # CHECK: print a quick summary
 df %>% summarise(
   n = n(),
-  n_missing = sum(is.na(____)),
-  mean = mean(____, na.rm = TRUE),
-  sd = sd(____, na.rm = TRUE)
+  n_missing = sum(is.na(gpp)),
+  mean = mean(gpp, na.rm = TRUE),
+  sd = sd(gpp, na.rm = TRUE)
 )
 ```
 
 **Prompt (2–3 sentences):** Why did you choose this response variable? What do you expect its seasonality/day–night pattern to be?
 
-> *Write your answer here.*
+> I chose `gpp` or Gross Primary Productivity because it measures the amount of carbon that plants uptake through photosynthesis and the seasonality/day-night pattern of photosynthesis would be interesting to analyze. I expect that during the daytime there will be higher gpp values and lower at night. During the spring, I would expect gpp values to be increasing and to peak in the summer. Then during the fall, I would expect gpp to be decreasing and to be at its lowest in the winter. 
 
 ---
 
@@ -130,11 +130,11 @@ Fill in at least **5 variables** from this dataset:
 
 | Variable | Units | Description | Expected sign/seasonality? |
 |----------|-------|-------------|----------------------------|
-|          |       |             |                            |
-|          |       |             |                            |
-|          |       |             |                            |
-|          |       |             |                            |
-|          |       |             |                            |
+|  fc      | µmolCO2 m-2 s-1 | Carbon Dioxide (CO2) turbulent flux |                            |
+|  le      | W m-2 | Latent heat turbulent flux |                            |
+|  ta      | deg C |  Air temperature |                            |
+| reco     | µmolCO2 m-2 s-1 |  Ecosystem Respiration |                            |
+| gpp      |  µmolCO2 m-2 s-1   | Gross Primary Productivity  |                            |
 
 ---
 
@@ -144,13 +144,14 @@ Remember: for this lab, the **population** is the entire 2023 half-hourly time s
 
 ## 2.1 Time series view
 
-```{r plot_time_series, echo=TRUE, eval=FALSE}
+```{r plot_time_series, echo=TRUE, eval=TRUE}
 # GOAL: Visualize seasonality over the year.
 # TODO: pick a y aesthetic using response_var.
 
 df %>%
-  ggplot(aes(x = date, y = ____)) +
-  geom_line(alpha = 0.25) +
+  filter(year(date)== 2023) %>%
+  ggplot(aes(x = date, y = gpp)) +
+  geom_line(alpha = 0.5, color="darkgreen") +
   theme_classic(base_size = 18) +
   labs(
     x = NULL,
@@ -161,30 +162,30 @@ df %>%
 
 **Prompt (2–3 sentences):** What major patterns do you see? (Seasonal cycle? Daily cycle? Outliers?)
 
-> *Write your answer here.*
+> Overall, during the fall and winter `gpp`appears to be decreasing and at its lowest, whearas during the spring and summer `gpp` appears to be increasing and at its peak. There also appears to be a daily cycle that is reflected by the  with the values increasing 
 
 ---
 
 ## 2.2 Population distribution (histogram + density)
 
-```{r pop_distribution, echo=TRUE, eval=FALSE}
+```{r pop_distribution, echo=TRUE, eval=TRUE}
 # GOAL: See the overall distribution of the population.
 # TODO: choose an appropriate number of bins (start with ~50).
 
-ggplot(df, aes(x = ____)) +
-  geom_histogram(bins = ___, alpha = 0.7) +
+ggplot(df, aes(x = gpp)) +
+  geom_histogram(bins = 50, alpha = 0.7, color="black",fill="darkgreen") +
   theme_classic(base_size = 18) +
   labs(x = response_var, y = "Count", title = "Population distribution (histogram)")
 
-ggplot(df, aes(x = ____)) +
-  geom_density(alpha = 0.7) +
+ggplot(df, aes(x = gpp)) +
+  geom_density(alpha = 0.7,color="black", fill="darkgreen") +
   theme_classic(base_size = 18) +
   labs(x = response_var, y = "Density", title = "Population distribution (density)")
 ```
 
 **Prompt:** Describe shape (skew, modality), center, and spread.
 
-> *Write your answer here.*
+> The distribution is slightly right skewed and is unimodal. There are a large number of values centered around zero, with the mean probaly being slightly above zero. Due to the skew, the median is probably lower than the mean. The spread is fairly wide with values ranging from ~-25 to 45.
 
 ---
 
@@ -192,10 +193,10 @@ ggplot(df, aes(x = ____)) +
 
 ### By month
 
-```{r pop_by_month, echo=TRUE, eval=FALSE}
+```{r pop_by_month, echo=TRUE, eval=TRUE}
 # TODO: make month appear in a sensible order (it already is an ordered factor if label=TRUE)
 df %>%
-  ggplot(aes(x = month, y = ____)) +
+  ggplot(aes(x = month, y = gpp)) +
   geom_boxplot(outlier.alpha = 0.25) +
   theme_classic(base_size = 18) +
   labs(x = NULL, y = response_var, title = "Population by month")
@@ -203,9 +204,9 @@ df %>%
 
 ### By day/night
 
-```{r pop_by_daynight, echo=TRUE, eval=FALSE}
+```{r pop_by_daynight, echo=TRUE, eval=TRUE}
 df %>%
-  ggplot(aes(x = day_night, y = ____)) +
+  ggplot(aes(x = day_night, y = gpp)) +
   geom_boxplot(outlier.alpha = 0.25) +
   theme_classic(base_size = 18) +
   labs(x = NULL, y = response_var, title = "Population by day vs night")
@@ -213,7 +214,7 @@ df %>%
 
 **Prompt (3–4 sentences):** Which grouping variable (month or day/night) seems to explain more variability in your response? Why?
 
-> *Write your answer here.*
+> Both month and day/night appear to explain the variability in my response (as I had predicted). However, night and day appears to explain more variability overall. This is because the separation or variance among the values between night and day is much sharper than the monthly variation, which appears to be more gradual. 
 
 ---
 
@@ -221,9 +222,9 @@ df %>%
 
 Compute the population mean and SD for your chosen response variable.
 
-```{r population_params, echo=TRUE, eval=FALSE}
-pop_mean <- mean(df____, na.rm = TRUE)
-pop_sd   <- sd(df____, na.rm = TRUE)
+```{r population_params, echo=TRUE, eval=TRUE}
+pop_mean <- mean(df$gpp, na.rm = TRUE)
+pop_sd   <- sd(df$gpp, na.rm = TRUE)
 
 tibble(
   response_var = response_var,
@@ -238,17 +239,17 @@ tibble(
 
 ## 4.1 One random sample
 
-```{r one_sample, echo=TRUE, eval=FALSE}
+```{r one_sample, echo=TRUE, eval=TRUE}
 set.seed(480)
 
 # TODO: choose a sample size (e.g., 200, 500, 1000)
-n_samp <- ___
+n_samp <- 1000
 
 samp <- df %>%
   slice_sample(n = n_samp)
 
-samp_mean <- mean(samp____, na.rm = TRUE)
-samp_sd   <- sd(samp____, na.rm = TRUE)
+samp_mean <- mean(samp$gpp, na.rm = TRUE)
+samp_sd   <- sd(samp$gpp, na.rm = TRUE)
 
 tibble(
   n_samp = n_samp,
@@ -261,22 +262,22 @@ tibble(
 
 **Prompt (2–3 sentences):** How close is your one-sample estimate to the population mean/SD? Is the difference surprising?
 
-> *Write your answer here.*
+> My one-sample estimate is fairly close to the population mean/SD. As the difference is small, I am not very surprised by the difference.
 
 ---
 
 ## 4.2 Sampling variability: many samples → many means
 
-```{r sampling_distribution, echo=TRUE, eval=FALSE}
+```{r sampling_distribution, echo=TRUE, eval=TRUE}
 set.seed(480)
 
-reps <- ___   # TODO: choose number of replicates (e.g., 500 or 1000)
+reps <- 500  # TODO: choose number of replicates (e.g., 500 or 1000)
 
 means <- replicate(
   reps,
   df %>%
     slice_sample(n = n_samp) %>%
-    summarise(m = mean(____, na.rm = TRUE)) %>%
+    summarise(m = mean(gpp, na.rm = TRUE)) %>%
     pull(m)
 )
 
@@ -294,7 +295,7 @@ ggplot(tibble(mean_est = means), aes(mean_est)) +
 
 **Prompt (2–3 sentences):** Is the sampling distribution centered on the population mean? What happens if you increase `n_samp`?
 
-> *Write your answer here.*
+> The sampling distribtion does appear to be centered (or pretty close to being centered) on the population mean. If I increase `n_samp` the 
 
 ---
 
@@ -304,20 +305,20 @@ Here you’ll test whether stratification helps when the population has structur
 
 ## 5.1 Stratify by month
 
-```{r strat_by_month, echo=TRUE, eval=FALSE}
+```{r strat_by_month, echo=TRUE, eval=TRUE}
 set.seed(480)
 
 # GOAL: sample within each month to ensure seasonal representation.
 # TODO: choose n_per_month so total sample size is reasonable (e.g., 12 * 20 = 240)
-n_per_month <- ___
+n_per_month <-  360
 
 samp_strat <- df %>%
   group_by(month) %>%
   slice_sample(n = n_per_month) %>%
   ungroup()
 
-strat_mean <- mean(samp_strat____, na.rm = TRUE)
-strat_sd   <- sd(samp_strat____, na.rm = TRUE)
+strat_mean <- mean(samp_strat$gpp, na.rm = TRUE)
+strat_sd   <- sd(samp_strat$gpp, na.rm = TRUE)
 
 tibble(
   n_per_month = n_per_month,
@@ -333,7 +334,7 @@ tibble(
 
 ## 5.2 Compare strategies (SRS vs stratified)
 
-```{r compare_sampling, echo=TRUE, eval=FALSE}
+```{r compare_sampling, echo=TRUE, eval=TRUE}
 tibble(
   strategy = c("Population", "SRS", "Stratified by month"),
   mean = c(pop_mean, samp_mean, strat_mean),
@@ -343,7 +344,7 @@ tibble(
 
 **Prompt (3–4 sentences):** Which strategy better approximated the population mean and SD for your response variable? Why might stratification help (or not) here?
 
-> *Write your answer here.*
+> The SRS strategy better aproximated the population mean and SD for my response variable. Stratifcation by month may not have helped here because while the variation in `gpp` is affected by seasonal cycles, it is also greatly affected by cycles of day and night. 
 
 ---
 
@@ -356,7 +357,7 @@ Answer in **4–6 sentences**:
 - In EAES field studies, when is stratification essential?
 - What is one trade-off of stratified sampling?
 
-> *Write your answer here.*
+> Seasonality matters for sampling because the population is not uniform overtime (in the case of `gpp` values are lower in winter and higher in summer). If you sample disproportionately from one season you might risk creating a biased estimate of the mean or under/overestimating variability. If latent grouping variables are ignored sampe estimates may be biased or inaccurate and important patterns may be misinterpreted or missed completely. In EAES field studies, stratification is essential, when the groups differ dramatically (such as) or environmental gradients (such as elevation or soil type) are strong. One trade-off of stratified sampling is convenience in the collections of samples in the field, as you would need prior knowledge of what would make good strata and you would have to visit more locations in order to collect samples. 
 
 ---
 
