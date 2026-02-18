@@ -131,10 +131,10 @@ Fill in at least **5 variables** from this dataset:
 | Variable | Units | Description | Expected sign/seasonality? |
 |----------|-------|-------------|----------------------------|
 |  fc      | µmolCO2 m-2 s-1 | Carbon Dioxide (CO2) turbulent flux |                            |
-|  le      | W m-2 | Latent heat turbulent flux |                            |
-|  ta      | deg C |  Air temperature |                            |
+|  le      | W m-2 | Latent heat turbulent flux |                           |
+|  ta      | deg C |  Air temperature |  increase in summer/day, decrease in winter/night |
 | reco     | µmolCO2 m-2 s-1 |  Ecosystem Respiration |                            |
-| gpp      |  µmolCO2 m-2 s-1   | Gross Primary Productivity  |                            |
+| gpp      |  µmolCO2 m-2 s-1   | Gross Primary Productivity  | increase in summer/day, decrease in winter/night |
 
 ---
 
@@ -162,7 +162,7 @@ df %>%
 
 **Prompt (2–3 sentences):** What major patterns do you see? (Seasonal cycle? Daily cycle? Outliers?)
 
-> Overall, during the fall and winter `gpp`appears to be decreasing and at its lowest, whearas during the spring and summer `gpp` appears to be increasing and at its peak. There also appears to be a daily cycle that is reflected by the  with the values increasing 
+> Overall, during the fall and winter `gpp`appears to be decreasing and at its lowest, whearas during the spring and summer `gpp` appears to be increasing and at its peak. A daily cycle might also be reflected by the variance from positive and negative values between each month. There are a few outliers, such as an extremely negative `gpp` value in April.
 
 ---
 
