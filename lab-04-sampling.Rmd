@@ -1,6 +1,6 @@
 ---
 title: "Lab 04 — Sampling from Time Series"
-author: "EAES 480 — Modern Statistics in Earth & Environmental Science"
+author: "Rachel Krick: EAES 480 — Modern Statistics in Earth & Environmental Science"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
   html_document:
@@ -130,8 +130,8 @@ Fill in at least **5 variables** from this dataset:
 
 | Variable | Units | Description | Expected sign/seasonality? |
 |----------|-------|-------------|----------------------------|
-|  fc      | µmolCO2 m-2 s-1 | Carbon Dioxide (CO2) turbulent flux |                            |
-|  le      | W m-2 | Latent heat turbulent flux |                           |
+|  fc      | µmolCO2 m-2 s-1 | Carbon Dioxide (CO2) turbulent flux |  increase in summer, decrease in winter |
+|  le      | W m-2 | Latent heat turbulent flux | increase in summer/decrease in winter  |
 |  ta      | deg C |  Air temperature |  increase in summer/day, decrease in winter/night |
 | reco     | µmolCO2 m-2 s-1 |  Ecosystem Respiration |   increase in summer, decrease in winter |
 | gpp      |  µmolCO2 m-2 s-1   | Gross Primary Productivity  | increase in summer/day, decrease in winter/night |
@@ -344,7 +344,7 @@ tibble(
 
 **Prompt (3–4 sentences):** Which strategy better approximated the population mean and SD for your response variable? Why might stratification help (or not) here?
 
-> The SRS strategy better aproximated the population mean and SD for my response variable. Stratifcation by month may not have helped here because while the variation in `gpp` is affected by seasonal cycles, it is also greatly affected by cycles of day and night. 
+> The SRS strategy better aproximated the population mean and SD for my response variable. Stratifcation by month may not have helped here because while the variation in `gpp` is affected by seasonal cycles, it is also greatly affected by cycles of day and night. While the seasonal changes that occur duriung different months do matter when it comes to `gpp`, ignoring the day/night cycle causes poorer approximations of the population. 
 
 ---
 
@@ -412,7 +412,7 @@ tibble(
 **Prompt (3–4 sentences):** Did systematic sampling approximate the population mean/SD better or worse than SRS?  
 What cycle (daily or seasonal) might be interacting with your chosen `k`?
 
-> Systematic sampling approximated the population mean worse than SRS. The daily cycle might be interacting with my chosen `k`. 
+> Systematic sampling approximated the population mean worse than SRS. The daily cycle might be interacting with my chosen `k`. Certain k values may have repeatedly sampled similar times of day, such as just the highest or lowest values leading to over- or under-representation of `gpp`. In the case of my chose `k` of 24, it was an overestimate.
 
 ---
 
@@ -454,7 +454,7 @@ tibble(
 **Prompt (3–4 sentences):** Why might cluster sampling have **higher variance** than SRS for the same number of measurements?  
 What feature of time series data (hint: autocorrelation) is relevant here?
 
-> *Write your answer here.*
+> Cluster sampling may have higher variance than SRS because `gpp` observations within a cluster are autocorrelated with the time of day. Clusters tend to be similar to one another and estimates from cluster sampling may overrepresent a specific instance in the cycle. In the case of `gpp` clustering by days might not capture the full daily cycle, with some samples overrepresenting daytime `gpp` and others nighttime `gpp`. As a result, different sampled clusters may produce very different means depending on when they occur, increasing variability across samples.
 
 ---
 
@@ -508,7 +508,7 @@ qc_samp %>%
 **Prompt (3–4 sentences):** Does quasi-continuous sampling preserve the **seasonal** pattern? The **daily** pattern?  
 In an EAES context, when is quasi-continuous sampling preferable to sparse discrete sampling?
 
-> *Write your answer here.*
+> The quasi-continuous sampling clearly preserves the daily pattern in `gpp`, as shown by the repeated 24-hour peaks and troughs in the July time series. While this subset primarily highlights the daily pattern, I would assume a quasi-continuous sampling of the full year would also preserve the seasonal pattern, as measurements are taken very frequently. In an EAES context, quasi-continuous sampling is preferable  to sparse discrete sampling when studying dynamic processes that have shorter term variability, like the day and night cycle of photosynthesis.
 
 ---
 
@@ -546,7 +546,7 @@ bind_rows(
 Explain *why* in terms of (i) seasonal/diurnal structure and (ii) dependence/autocorrelation.  
 If you were designing a real EAES study with limited field days, what hybrid strategy would you propose (e.g., stratified + clustered)?
 
-> *Write your answer here.*
+> The quasi-continuous strategy gave the best estimate of the population mean and standard deviation. This is because it preserved both the daily and seasonal patterns of `gpp`. The other strategies did not work as well either because they only captured specific parts of the daily cycle (such as systematic) or because they emphasized monthly or seasonal cycle over daily (such as stratification by month). In a real EAES study with limited field days, I would propose a hybrid strategy combining seasonal stratification with clustered full-day sampling. This would capture both the seasonal and diurnal variability that impacts `gpp`.
 
 ---
 
